@@ -1,0 +1,255 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --primary: #70e3e4;
+  --primary-dark: #559ed7;
+  --secondary: #335b99;
+  --accent: #40338b;
+  --accent-dark: #461d72;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-accent-dark: var(--accent-dark);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* New gradient utility classes for buttons */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #70e3e4 0%, #559ed7 100%);
+}
+
+.bg-gradient-secondary {
+  background: linear-gradient(135deg, #335b99 0%, #40338b 100%);
+}
+
+.bg-gradient-accent {
+  background: linear-gradient(135deg, #40338b 0%, #461d72 100%);
+}
+
+.bg-gradient-cyan-blue {
+  background: linear-gradient(135deg, #70e3e4 0%, #335b99 100%);
+}
+
+.bg-gradient-blue-purple {
+  background: linear-gradient(135deg, #559ed7 0%, #40338b 100%);
+}
+
+.bg-gradient-purple-pink {
+  background: linear-gradient(135deg, #40338b 0%, #461d72 100%);
+}
+
+.bg-gradient-cyan-purple {
+  background: linear-gradient(135deg, #70e3e4 0%, #461d72 100%);
+}
+
+.bg-gradient-blue-cyan {
+  background: linear-gradient(135deg, #335b99 0%, #70e3e4 100%);
+}
+
+.hover\:bg-gradient-primary:hover {
+  background: linear-gradient(135deg, #70e3e4 0%, #559ed7 100%);
+}
+
+.hover\:bg-gradient-secondary:hover {
+  background: linear-gradient(135deg, #335b99 0%, #40338b 100%);
+}
+
+.hover\:bg-gradient-accent:hover {
+  background: linear-gradient(135deg, #40338b 0%, #461d72 100%);
+}
+
+.hover\:bg-gradient-cyan-blue:hover {
+  background: linear-gradient(135deg, #70e3e4 0%, #335b99 100%);
+}
+
+.hover\:bg-gradient-blue-purple:hover {
+  background: linear-gradient(135deg, #559ed7 0%, #40338b 100%);
+}
+
+.hover\:bg-gradient-purple-pink:hover {
+  background: linear-gradient(135deg, #40338b 0%, #461d72 100%);
+}
+
+.hover\:bg-gradient-cyan-purple:hover {
+  background: linear-gradient(135deg, #70e3e4 0%, #461d72 100%);
+}
+
+.hover\:bg-gradient-blue-cyan:hover {
+  background: linear-gradient(135deg, #335b99 0%, #70e3e4 100%);
+}
+
+/* Custom gradient for Create Invoice button - equal parts of all 51 colors */
+.bg-gradient-invoice {
+  background: linear-gradient(90deg,
+    #70E3E4 0%, #70E3E4 1.96%,
+    #6DDBE0 1.96%, #6DDBE0 3.92%,
+    #6AD3DC 3.92%, #6AD3DC 5.88%,
+    #67CBD8 5.88%, #67CBD8 7.84%,
+    #64C3D4 7.84%, #64C3D4 9.80%,
+    #61BBCE 9.80%, #61BBCE 11.76%,
+    #5EB3CA 11.76%, #5EB3CA 13.72%,
+    #5BACCA 13.72%, #5BACCA 15.68%,
+    #58A4C6 15.68%, #58A4C6 17.64%,
+    #559CC2 17.64%, #559CC2 19.60%,
+    #5294BE 19.60%, #5294BE 21.56%,
+    #4F8CBA 21.56%, #4F8CBA 23.52%,
+    #4C84B6 23.52%, #4C84B6 25.48%,
+    #497CB2 25.48%, #497CB2 27.44%,
+    #4674AE 27.44%, #4674AE 29.40%,
+    #436CAA 29.40%, #436CAA 31.36%,
+    #4064A6 31.36%, #4064A6 33.32%,
+    #3D5CA2 33.32%, #3D5CA2 35.28%,
+    #3A549E 35.28%, #3A549E 37.24%,
+    #374C9A 37.24%, #374C9A 39.20%,
+    #344496 39.20%, #344496 41.16%,
+    #313C92 41.16%, #313C92 43.12%,
+    #2E348E 43.12%, #2E348E 45.08%,
+    #2B2C8A 45.08%, #2B2C8A 47.04%,
+    #282486 47.04%, #282486 49.00%,
+    #251C82 49.00%, #251C82 50.96%,
+    #23197D 50.96%, #23197D 52.92%,
+    #211778 52.92%, #211778 54.88%,
+    #1F1573 54.88%, #1F1573 56.84%,
+    #1E136E 56.84%, #1E136E 58.80%,
+    #1C1169 58.80%, #1C1169 60.76%,
+    #1A0F64 60.76%, #1A0F64 62.72%,
+    #180D5F 62.72%, #180D5F 64.68%,
+    #160B5A 64.68%, #160B5A 66.64%,
+    #140955 66.64%, #140955 68.60%,
+    #120750 68.60%, #120750 70.56%,
+    #10054B 70.56%, #10054B 72.52%,
+    #0E0346 72.52%, #0E0346 74.48%,
+    #0C0241 74.48%, #0C0241 76.44%,
+    #0B023C 76.44%, #0B023C 78.40%,
+    #0A0237 78.40%, #0A0237 80.36%,
+    #090233 80.36%, #090233 82.32%,
+    #08022F 82.32%, #08022F 84.28%,
+    #07022B 84.28%, #07022B 86.24%,
+    #060227 86.24%, #060227 88.20%,
+    #050223 88.20%, #050223 90.16%,
+    #05021F 90.16%, #05021F 92.12%,
+    #06021B 92.12%, #06021B 94.08%,
+    #0B041A 94.08%, #0B041A 96.04%,
+    #461D72 96.04%, #461D72 100%
+  );
+}
+
+.hover\:bg-gradient-invoice:hover {
+  background: linear-gradient(90deg,
+    #461D72 0%, #461D72 1.96%,
+    #0B041A 1.96%, #0B041A 3.92%,
+    #06021B 3.92%, #06021B 5.88%,
+    #05021F 5.88%, #05021F 7.84%,
+    #050223 7.84%, #050223 9.80%,
+    #060227 9.80%, #060227 11.76%,
+    #07022B 11.76%, #07022B 13.72%,
+    #08022F 13.72%, #08022F 15.68%,
+    #090233 15.68%, #090233 17.64%,
+    #0A0237 17.64%, #0A0237 19.60%,
+    #0B023C 19.60%, #0B023C 21.56%,
+    #0C0241 21.56%, #0C0241 23.52%,
+    #0E0346 23.52%, #0E0346 25.48%,
+    #10054B 25.48%, #10054B 27.44%,
+    #120750 27.44%, #120750 29.40%,
+    #140955 29.40%, #140955 31.36%,
+    #160B5A 31.36%, #160B5A 33.32%,
+    #180D5F 33.32%, #180D5F 35.28%,
+    #1A0F64 35.28%, #1A0F64 37.24%,
+    #1C1169 37.24%, #1C1169 39.20%,
+    #1E136E 39.20%, #1E136E 41.16%,
+    #1F1573 41.16%, #1F1573 43.12%,
+    #211778 43.12%, #211778 45.08%,
+    #23197D 45.08%, #23197D 47.04%,
+    #251C82 47.04%, #251C82 49.00%,
+    #282486 49.00%, #282486 50.96%,
+    #2B2C8A 50.96%, #2B2C8A 52.92%,
+    #2E348E 52.92%, #2E348E 54.88%,
+    #313C92 54.88%, #313C92 56.84%,
+    #344496 56.84%, #344496 58.80%,
+    #374C9A 58.80%, #374C9A 60.76%,
+    #3A549E 60.76%, #3A549E 62.72%,
+    #3D5CA2 62.72%, #3D5CA2 64.68%,
+    #4064A6 64.68%, #4064A6 66.64%,
+    #436CAA 66.64%, #436CAA 68.60%,
+    #4674AE 68.60%, #4674AE 70.56%,
+    #497CB2 70.56%, #497CB2 72.52%,
+    #4C84B6 72.52%, #4C84B6 74.48%,
+    #4F8CBA 74.48%, #4F8CBA 76.44%,
+    #5294BE 76.44%, #5294BE 78.40%,
+    #559CC2 78.40%, #559CC2 80.36%,
+    #58A4C6 80.36%, #58A4C6 82.32%,
+    #5BACCA 82.32%, #5BACCA 84.28%,
+    #5EB3CA 84.28%, #5EB3CA 86.24%,
+    #61BBCE 86.24%, #61BBCE 88.20%,
+    #64C3D4 88.20%, #64C3D4 90.16%,
+    #67CBD8 90.16%, #67CBD8 92.12%,
+    #6AD3DC 92.12%, #6AD3DC 94.08%,
+    #6DDBE0 94.08%, #6DDBE0 96.04%,
+    #70E3E4 96.04%, #70E3E4 100%
+  );
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: #f0f1f5;
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Custom scrollbar for better UX */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Focus styles for accessibility */
+.focus-visible:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Smooth transitions for interactive elements */
+button, a {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Loading animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
