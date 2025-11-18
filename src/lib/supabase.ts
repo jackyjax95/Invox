@@ -5,6 +5,13 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
+// Item interface for invoices and quotes
+export interface InvoiceItem {
+  description: string
+  quantity: number
+  price: number
+}
+
 // Database types for TypeScript
 export interface Database {
   public: {
@@ -16,7 +23,7 @@ export interface Database {
           user_id: string
           client_name: string
           client_email: string
-          items: any[]
+          items: InvoiceItem[]
           total: number
           status: string
           created_at: string
@@ -29,7 +36,7 @@ export interface Database {
           user_id: string
           client_name: string
           client_email?: string
-          items?: any[]
+          items?: InvoiceItem[]
           total: number
           status?: string
           created_at?: string
@@ -42,7 +49,7 @@ export interface Database {
           user_id?: string
           client_name?: string
           client_email?: string
-          items?: any[]
+          items?: InvoiceItem[]
           total?: number
           status?: string
           created_at?: string
@@ -56,7 +63,7 @@ export interface Database {
           user_id: string
           client_name: string
           client_email: string
-          items: any[]
+          items: InvoiceItem[]
           total: number
           status: string
           created_at: string
@@ -68,7 +75,7 @@ export interface Database {
           user_id: string
           client_name: string
           client_email?: string
-          items?: any[]
+          items?: InvoiceItem[]
           total: number
           status?: string
           created_at?: string
@@ -80,7 +87,7 @@ export interface Database {
           user_id?: string
           client_name?: string
           client_email?: string
-          items?: any[]
+          items?: InvoiceItem[]
           total?: number
           status?: string
           created_at?: string
