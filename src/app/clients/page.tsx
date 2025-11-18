@@ -76,7 +76,7 @@ export default function ClientsPage() {
         },
         body: JSON.stringify({
           ...newClient,
-          user_id: 'demo-user', // Demo user ID for MVP
+          user_id: '550e8400-e29b-41d4-a716-446655440000', // Demo user UUID from seed data
           created_at: new Date().toISOString(),
         }),
       });
