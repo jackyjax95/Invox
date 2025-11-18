@@ -10,7 +10,8 @@ const supabaseAdmin = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    const { data: clients, error } = await supabase
+    // Use service role client to bypass RLS for MVP demo
+    const { data: clients, error } = await supabaseAdmin
       .from('clients')
       .select('*')
       .order('created_at', { ascending: false });
