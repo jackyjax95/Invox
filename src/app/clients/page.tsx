@@ -15,6 +15,16 @@ interface Client {
   outstandingBalance?: number;
 }
 
+interface Invoice {
+  id: string;
+  invoice_number: string;
+  client_email: string;
+  total: number;
+  status: string;
+  created_at: string;
+  due_date: string;
+}
+
 interface ClientUpdateData {
   name: string;
   email: string;
@@ -50,7 +60,7 @@ export default function ClientsPage() {
 
         // Fetch all invoices to calculate outstanding balances
         const invoicesResponse = await fetch('/api/invoices');
-        let invoicesData = { invoices: [] };
+        let invoicesData: { invoices: Invoice[] } = { invoices: [] };
         if (invoicesResponse.ok) {
           invoicesData = await invoicesResponse.json();
         }
@@ -58,11 +68,11 @@ export default function ClientsPage() {
         // Calculate outstanding balance for each client
         const clientsWithBalances = clientsList.map((client: Client) => {
           const clientInvoices = invoicesData.invoices.filter(
-            (invoice: any) => invoice.client_email === client.email
+            (invoice: Invoice) => invoice.client_email === client.email
           );
           const outstandingBalance = clientInvoices
-            .filter((invoice: any) => invoice.status !== 'paid')
-            .reduce((total: number, invoice: any) => total + parseFloat(invoice.total || 0), 0);
+            .filter((invoice: Invoice) => invoice.status !== 'paid')
+            .reduce((total: number, invoice: Invoice) => total + parseFloat(invoice.total.toString() || '0'), 0);
 
           return {
             ...client,
