@@ -158,7 +158,7 @@ export default function InvoicesPage() {
             </div>
             <Link
               href="/invoice/new"
-              className="bg-gradient-invoice text-white px-6 py-3 rounded-lg hover:bg-gradient-invoice transition-all inline-flex items-center gap-2 shadow-lg"
+              className="bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-lg hover:from-primary-dark hover:to-primary transition-all inline-flex items-center gap-2 shadow-lg"
             >
               <Plus size={20} />
               Create Invoice
