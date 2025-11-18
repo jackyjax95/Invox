@@ -373,7 +373,7 @@ export default function NewExpensePage() {
                 )}
 
                 <p className="text-xs text-gray-500 mt-1">
-                  Can't find your vendor? <Link href="/expense/vendors" className="text-primary hover:text-primary-dark">Add new vendor</Link>
+                  Can&apos;t find your vendor? <Link href="/expense/vendors" className="text-primary hover:text-primary-dark">Add new vendor</Link>
                 </p>
               </div>
 
@@ -539,7 +539,7 @@ export default function NewExpensePage() {
                         }
                       </span>
                     </label>
-                    <p className="text-xs text-gray-500 mt-1">Check if this item's amount already includes VAT</p>
+                    <p className="text-xs text-gray-500 mt-1">Check if this item &apos;s amount already includes VAT</p>
                   </div>
                 </div>
               ))}
