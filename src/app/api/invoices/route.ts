@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+// Service role client for bypassing RLS in MVP
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 // Function to generate next invoice number
 async function generateInvoiceNumber(): Promise<string> {
   try {
     // Get the highest invoice number
-    const { data: invoices, error } = await supabase
+    const { data: invoices, error } = await supabaseAdmin
       .from('invoices')
       .select('invoice_number')
       .order('invoice_number', { ascending: false })
@@ -35,7 +42,7 @@ async function generateInvoiceNumber(): Promise<string> {
 
 export async function GET(request: NextRequest) {
   try {
-    const { data: invoices, error } = await supabase
+    const { data: invoices, error } = await supabaseAdmin
       .from('invoices')
       .select('*')
       .order('created_at', { ascending: false });
@@ -86,7 +93,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Insert into Supabase
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('invoices')
       .insert(newInvoice)
       .select()
