@@ -14,7 +14,14 @@ interface Client {
 
 interface QuoteData {
   id: string;
-  [key: string]: any;
+  user_id?: string;
+  client_name?: string;
+  client_email?: string;
+  total?: number;
+  status?: string;
+  created_at?: string;
+  valid_until?: string;
+  description?: string;
 }
 
 interface ParsedQuote {
