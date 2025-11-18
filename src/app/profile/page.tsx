@@ -168,7 +168,7 @@ export default function ProfilePage() {
                 placeholder="Enter your business name"
                 required
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-[#6a7282] mt-1">
                 This name will be used in your social media posts and invoices
               </p>
             </div>
@@ -196,7 +196,7 @@ export default function ProfilePage() {
                 disabled
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-[#6a7282] mt-1">
                 Email cannot be changed here. Contact support if needed.
               </p>
             </div>
