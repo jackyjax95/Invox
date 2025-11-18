@@ -165,6 +165,45 @@ function NewInvoicePageContent() {
     }
   }, [parsedInvoice.unitPrice, parsedInvoice.quantity, parsedInvoice.cost]);
 
+  const checkMilestoneAchievement = async () => {
+    try {
+      // Get current invoice count
+      const invoicesRes = await fetch('/api/invoices');
+      if (invoicesRes.ok) {
+        const invoicesData = await invoicesRes.json();
+        const invoiceCount = invoicesData.invoices?.length || 0;
+
+        // Check if we've reached a milestone
+        const milestones = [1, 5, 10, 25, 50, 100];
+        const achievedMilestone = milestones.find(milestone => milestone === invoiceCount);
+
+        if (achievedMilestone) {
+          // Generate social post for this milestone
+          const businessName = 'Invox'; // Could be fetched from user profile
+          const postRes = await fetch('/api/social-post', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              milestone: achievedMilestone,
+              businessName: businessName
+            }),
+          });
+
+          if (postRes.ok) {
+            const postData = await postRes.json();
+            // Store the pending social post
+            localStorage.setItem('pendingSocialPost', JSON.stringify(postData));
+            console.log('Milestone achieved! Social post generated:', postData);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error checking milestone:', error);
+    }
+  };
+
   const startListening = () => {
     setIsListening(true);
     SpeechRecognition.startListening({ continuous: true });
@@ -310,6 +349,9 @@ function NewInvoicePageContent() {
         console.log('Invoice number:', savedInvoice.invoice_number);
 
         alert(`Invoice saved successfully! Invoice Number: ${savedInvoice.invoice_number}`);
+
+        // Check for milestone achievement
+        checkMilestoneAchievement();
 
         // If this was created from a quote, show additional info
         if (fromQuote) {

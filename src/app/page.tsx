@@ -181,7 +181,7 @@ export default function Home() {
         <header className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
             <Rocket className="text-primary" size={40} />
-            Smart Invoice Dashboard
+            Invox Dashboard
           </h1>
           <p className="text-gray-600 text-lg">Your business is thriving! Here&apos;s what&apos;s happening:</p>
         </header>

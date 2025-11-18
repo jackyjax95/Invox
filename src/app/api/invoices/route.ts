@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 // Service role client for bypassing RLS in MVP
-const supabaseAdmin = process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY !== 'your_service_role_key_here'
+const supabaseAdmin = process.env.SUPABASE_SERVICE_ROLE_KEY &&
+  process.env.SUPABASE_SERVICE_ROLE_KEY !== 'your_service_role_key_here' &&
+  process.env.SUPABASE_SERVICE_ROLE_KEY.trim() !== ''
   ? createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -94,6 +96,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('POST /api/invoices called');
+    console.log('SUPABASE_SERVICE_ROLE_KEY exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
+    console.log('SUPABASE_SERVICE_ROLE_KEY value:', process.env.SUPABASE_SERVICE_ROLE_KEY);
+    console.log('supabaseAdmin is null:', supabaseAdmin === null);
+
     const body = await request.json();
 
     console.log('Received invoice data:', body);
@@ -144,11 +151,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(data);
     } else {
       // Use mock data when Supabase is not configured
+      console.log('Using mock data fallback for invoice creation');
       const mockInvoice = {
         ...newInvoice,
         id: newInvoice.invoice_number, // Use invoice number as ID for mock data
       };
+      console.log('Created mock invoice:', mockInvoice);
       mockInvoices.push(mockInvoice);
+      console.log('Mock invoices array now has', mockInvoices.length, 'items');
       return NextResponse.json(mockInvoice);
     }
   } catch (error) {
