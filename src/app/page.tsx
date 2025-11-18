@@ -183,7 +183,7 @@ export default function Home() {
             <Rocket className="text-primary" size={40} />
             Smart Invoice Dashboard
           </h1>
-          <p className="text-gray-600 text-lg">Your business is thriving! Here's what's happening:</p>
+          <p className="text-gray-600 text-lg">Your business is thriving! Here&apos;s what&apos;s happening:</p>
         </header>
 
         {/* Motivational Message */}
@@ -205,7 +205,7 @@ export default function Home() {
                     <span className="text-2xl">🎉</span>
                     <div>
                       <p className="text-lg font-semibold">Milestone Achieved!</p>
-                      <p className="text-sm opacity-90">You've reached a new invoice milestone. Share your success on social media!</p>
+                      <p className="text-sm opacity-90">You&apos;ve reached a new invoice milestone. Share your success on social media!</p>
                     </div>
                   </div>
                   <Link
