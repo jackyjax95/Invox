@@ -459,3 +459,11 @@ function DashboardContent() {
     </div>
   );
 }
+
+export default function Home() {
+  return (
+    <ProtectedRoute>
+      <DashboardContent />
+    </ProtectedRoute>
+  );
+}

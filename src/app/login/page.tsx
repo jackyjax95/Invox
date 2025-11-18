@@ -111,6 +111,7 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 text-center">
+            {/* eslint-disable-next-line react/no-unescaped-entities */}
             <p className="text-gray-600">
               Don't have an account?{' '}
               <Link
