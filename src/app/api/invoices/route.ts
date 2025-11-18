@@ -3,34 +3,63 @@ import { supabase } from '@/lib/supabase';
 import { createClient } from '@supabase/supabase-js';
 
 // Service role client for bypassing RLS in MVP
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const supabaseAdmin = process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY !== 'your_service_role_key_here'
+  ? createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+  : null;
+
+// Mock data for development when Supabase is not configured
+let mockInvoices = [
+  {
+    id: 'INV00001',
+    invoice_number: 'INV00001',
+    user_id: 'demo-user',
+    client_name: 'ABC Corp',
+    client_email: 'billing@abc.com',
+    items: [{ description: 'Web development services', quantity: 1, price: 1500 }],
+    total: 1500,
+    status: 'paid',
+    created_at: new Date().toISOString(),
+    due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    description: 'Website development project'
+  }
+];
 
 // Function to generate next invoice number
 async function generateInvoiceNumber(): Promise<string> {
   try {
-    // Get the highest invoice number
-    const { data: invoices, error } = await supabaseAdmin
-      .from('invoices')
-      .select('invoice_number')
-      .order('invoice_number', { ascending: false })
-      .limit(1);
+    if (supabaseAdmin) {
+      // Get the highest invoice number from Supabase
+      const { data: invoices, error } = await supabaseAdmin
+        .from('invoices')
+        .select('invoice_number')
+        .order('invoice_number', { ascending: false })
+        .limit(1);
 
-    if (error) {
-      console.error('Error fetching invoice numbers:', error);
-      // Fallback to a default number
-      return 'INV00001';
-    }
-
-    if (invoices && invoices.length > 0) {
-      const lastNumber = invoices[0].invoice_number;
-      // Extract the numeric part (assuming format INVXXXXX)
-      const numericPart = parseInt(lastNumber.replace('INV', ''));
-      if (!isNaN(numericPart)) {
-        return `INV${(numericPart + 1).toString().padStart(5, '0')}`;
+      if (error) {
+        console.error('Error fetching invoice numbers:', error);
+        // Fallback to a default number
+        return 'INV00001';
       }
+
+      if (invoices && invoices.length > 0) {
+        const lastNumber = invoices[0].invoice_number;
+        // Extract the numeric part (assuming format INVXXXXX)
+        const numericPart = parseInt(lastNumber.replace('INV', ''));
+        if (!isNaN(numericPart)) {
+          return `INV${(numericPart + 1).toString().padStart(5, '0')}`;
+        }
+      }
+    } else {
+      // Use mock data numbering
+      const existingNumbers = mockInvoices
+        .map(invoice => parseInt(invoice.invoice_number.replace('INV', '')))
+        .filter(num => !isNaN(num));
+
+      const nextNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : 1;
+      return `INV${nextNumber.toString().padStart(5, '0')}`;
     }
 
     return 'INV00001';
@@ -42,17 +71,22 @@ async function generateInvoiceNumber(): Promise<string> {
 
 export async function GET(request: NextRequest) {
   try {
-    const { data: invoices, error } = await supabaseAdmin
-      .from('invoices')
-      .select('*')
-      .order('created_at', { ascending: false });
+    if (supabaseAdmin) {
+      const { data: invoices, error } = await supabaseAdmin
+        .from('invoices')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching invoices:', error);
-      return NextResponse.json({ error: 'Failed to fetch invoices' }, { status: 500 });
+      if (error) {
+        console.error('Error fetching invoices:', error);
+        return NextResponse.json({ error: 'Failed to fetch invoices' }, { status: 500 });
+      }
+
+      return NextResponse.json({ invoices: invoices || [] });
+    } else {
+      // Return mock data when Supabase is not configured
+      return NextResponse.json({ invoices: mockInvoices });
     }
-
-    return NextResponse.json({ invoices: invoices || [] });
   } catch (error) {
     console.error('Error fetching invoices:', error);
     return NextResponse.json({ error: 'Failed to fetch invoices' }, { status: 500 });
@@ -92,19 +126,29 @@ export async function POST(request: NextRequest) {
       created_at: newInvoice.created_at,
     });
 
-    // Insert into Supabase
-    const { data, error } = await supabaseAdmin
-      .from('invoices')
-      .insert(newInvoice)
-      .select()
-      .single();
+    if (supabaseAdmin) {
+      // Insert into Supabase
+      const { data, error } = await supabaseAdmin
+        .from('invoices')
+        .insert(newInvoice)
+        .select()
+        .single();
 
-    if (error) {
-      console.error('Error creating invoice:', error);
-      return NextResponse.json({ error: 'Failed to create invoice' }, { status: 500 });
+      if (error) {
+        console.error('Error creating invoice:', error);
+        return NextResponse.json({ error: 'Failed to create invoice' }, { status: 500 });
+      }
+
+      return NextResponse.json(data);
+    } else {
+      // Use mock data when Supabase is not configured
+      const mockInvoice = {
+        ...newInvoice,
+        id: newInvoice.invoice_number, // Use invoice number as ID for mock data
+      };
+      mockInvoices.push(mockInvoice);
+      return NextResponse.json(mockInvoice);
     }
-
-    return NextResponse.json(data);
   } catch (error) {
     console.error('Error creating invoice:', error);
     return NextResponse.json({ error: 'Failed to create invoice' }, { status: 500 });
