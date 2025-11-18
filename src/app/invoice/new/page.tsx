@@ -413,7 +413,7 @@ export default function NewInvoicePage() {
                 {isListening ? 'Listening...' : 'Click to start recording'}
               </p>
               <p className="text-sm text-black">
-                Say something like: "Create invoice for John Doe, order number PO-12345, for web development services, unit price 1500 dollars, quantity 1, due date next month"
+                Say something like: &quot; Create invoice for John Doe, order number PO-12345, for web development services, unit price 1500 dollars, quantity 1, due date next month &quot;
               </p>
             </div>
           </div>
