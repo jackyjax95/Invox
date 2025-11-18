@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import { ArrowLeft, Download, Mail, MessageCircle } from 'lucide-react';
 
 interface InvoiceItem {
@@ -20,8 +19,8 @@ interface Invoice {
   items: InvoiceItem[];
   total: number;
   status: string;
-  created_at: any;
-  due_date: any;
+  created_at: string;
+  due_date: string | null;
 }
 
 export default function InvoiceDetailPage() {
@@ -34,39 +33,19 @@ export default function InvoiceDetailPage() {
   useEffect(() => {
     const fetchInvoice = async () => {
       try {
-        // First try to fetch from Firebase
-        const invoiceRef = doc(db, 'invoices', invoiceId);
-        const invoiceSnap = await getDoc(invoiceRef);
+        // Fetch from Supabase
+        const { data: invoice, error } = await supabase
+          .from('invoices')
+          .select('*')
+          .eq('id', invoiceId)
+          .single();
 
-        if (invoiceSnap.exists()) {
-          const invoiceData = invoiceSnap.data() as Omit<Invoice, 'id'>;
-          setInvoice({
-            id: invoiceSnap.id,
-            ...invoiceData,
-          });
-        } else {
-          // Fallback to mock API if not found in Firebase
-          const response = await fetch(`/api/invoices`);
-          if (!response.ok) {
-            throw new Error('Failed to fetch invoices');
-          }
-          const data = await response.json();
-          const mockInvoice = data.invoices.find((inv: any) => inv.id === invoiceId);
-          if (mockInvoice) {
-            setInvoice({
-              id: mockInvoice.id,
-              client_name: mockInvoice.client_name,
-              client_email: mockInvoice.client_email,
-              items: mockInvoice.items || [],
-              total: mockInvoice.total,
-              status: mockInvoice.status,
-              created_at: new Date(mockInvoice.created_at),
-              due_date: new Date(mockInvoice.due_date),
-            });
-          } else {
-            setError('Invoice not found');
-          }
+        if (error || !invoice) {
+          setError('Invoice not found');
+          return;
         }
+
+        setInvoice(invoice);
       } catch (err) {
         console.error('Error fetching invoice:', err);
         setError('Failed to load invoice');
@@ -87,7 +66,7 @@ export default function InvoiceDetailPage() {
   const handleShareWhatsApp = () => {
     if (!invoice) return;
 
-    const message = `Invoice from Your Company Name\n\nInvoice ID: ${invoice.id}\nClient: ${invoice.client_name}\nTotal: R${invoice.total.toFixed(2)}\nDue Date: ${invoice.due_date?.toDate()?.toLocaleDateString('en-GB') || 'N/A'}\n\nPlease find the attached invoice.`;
+    const message = `Invoice from Your Company Name\n\nInvoice ID: ${invoice.id}\nClient: ${invoice.client_name}\nTotal: R${invoice.total.toFixed(2)}\nDue Date: ${invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-GB') : 'N/A'}\n\nPlease find the attached invoice.`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -96,7 +75,7 @@ export default function InvoiceDetailPage() {
     if (!invoice) return;
 
     const subject = `Invoice ${invoice.id} from Your Company Name`;
-    const body = `Dear ${invoice.client_name},\n\nPlease find attached invoice ${invoice.id} for R${invoice.total.toFixed(2)}.\n\nDue Date: ${invoice.due_date?.toDate()?.toLocaleDateString('en-GB') || 'N/A'}\n\nThank you for your business!\n\nBest regards,\nYour Company Name`;
+    const body = `Dear ${invoice.client_name},\n\nPlease find attached invoice ${invoice.id} for R${invoice.total.toFixed(2)}.\n\nDue Date: ${invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-GB') : 'N/A'}\n\nThank you for your business!\n\nBest regards,\nYour Company Name`;
 
     const mailtoUrl = `mailto:${invoice.client_email || ''}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(mailtoUrl, '_blank');
@@ -177,10 +156,10 @@ export default function InvoiceDetailPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-              <p className="text-gray-600">Invoice Date: {invoice.created_at?.toDate()?.toLocaleDateString('en-GB') || 'N/A'}</p>
+              <p className="text-gray-600">Invoice Date: {invoice.created_at ? new Date(invoice.created_at).toLocaleDateString('en-GB') : 'N/A'}</p>
             </div>
             <div>
-              <p className="text-gray-600">Due Date: {invoice.due_date?.toDate()?.toLocaleDateString('en-GB') || 'N/A'}</p>
+              <p className="text-gray-600">Due Date: {invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-GB') : 'N/A'}</p>
             </div>
           </div>
 
