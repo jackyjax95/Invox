@@ -1,12 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { Mic, MicOff, Save, ArrowLeft, FileText } from 'lucide-react';
 import Link from 'next/link';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 
 interface Client {
   id: string;
@@ -41,7 +39,7 @@ interface ParsedInvoice {
   dueDate: string;
 }
 
-export default function NewInvoicePage() {
+function NewInvoicePageContent() {
   const [clients, setClients] = useState<Client[]>([]);
   const [parsedInvoice, setParsedInvoice] = useState<ParsedInvoice>({
     clientId: '',
@@ -111,7 +109,7 @@ export default function NewInvoicePage() {
     const isFromQuote = searchParams.get('from') === 'quote';
     if (isFromQuote) {
       setFromQuote(true);
-      
+
       // Get quote data from localStorage
       const quoteDataStr = localStorage.getItem('pendingInvoiceFromQuote');
       if (quoteDataStr) {
@@ -129,7 +127,7 @@ export default function NewInvoicePage() {
             dueDate: quoteData.dueDate || '',
           }));
           setOriginalQuoteId(quoteData.originalQuoteId || '');
-          
+
           // Clear the localStorage data
           localStorage.removeItem('pendingInvoiceFromQuote');
         } catch (error) {
@@ -147,7 +145,7 @@ export default function NewInvoicePage() {
     const unitPrice = parseFloat(parsedInvoice.unitPrice) || 0;
     const quantity = parseFloat(parsedInvoice.quantity) || 1;
     const calculatedTotal = unitPrice * quantity;
-    
+
     // Only auto-calculate if no manual total has been entered
     if (!parsedInvoice.cost || parsedInvoice.cost === '' || calculatedTotal > 0) {
       setParsedInvoice(prev => ({
@@ -229,46 +227,6 @@ export default function NewInvoicePage() {
     });
   };
 
-  const checkMilestone = async (userId: string) => {
-    try {
-      // Get current invoice count
-      const invoicesRef = collection(db, 'invoices');
-      const q = query(invoicesRef, where('user_id', '==', userId));
-      const querySnapshot = await getDocs(q);
-      const currentCount = querySnapshot.size;
-
-      // Check if this invoice triggers a milestone
-      const milestones = [1, 5, 10, 25, 50, 100];
-      const newCount = currentCount + 1;
-
-      if (milestones.includes(newCount)) {
-        // Get business name from user settings (assuming it's stored in user profile)
-        const userDoc = await getDocs(query(collection(db, 'users'), where('id', '==', userId)));
-        let businessName = 'Smart Invoice';
-        if (!userDoc.empty) {
-          const userData = userDoc.docs[0].data();
-          businessName = userData.businessName || userData.name || 'Smart Invoice';
-        }
-
-        // Generate social post
-        const response = await fetch('/api/social-post', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ milestone: newCount, businessName }),
-        });
-
-        if (response.ok) {
-          const postData = await response.json();
-          // Store the generated post for later sharing
-          localStorage.setItem('pendingSocialPost', JSON.stringify(postData));
-          // Show notification to user
-          alert(`🎉 Milestone reached! ${newCount} invoices created. Check your dashboard for a social media post to share!`);
-        }
-      }
-    } catch (error) {
-      console.error('Error checking milestone:', error);
-    }
-  };
 
   const handleSave = async () => {
     try {
@@ -280,9 +238,6 @@ export default function NewInvoicePage() {
 
       // Get current user (in a real app, this would come from auth)
       const userId = 'demo-user'; // Replace with actual user ID from auth
-
-      // Check for milestone before saving
-      await checkMilestone(userId);
 
       // Calculate total cost
       const quantity = parseFloat(parsedInvoice.quantity) || 1;
@@ -325,12 +280,12 @@ export default function NewInvoicePage() {
         console.log('Invoice number:', savedInvoice.invoice_number);
 
         alert(`Invoice saved successfully! Invoice Number: ${savedInvoice.invoice_number}`);
-        
+
         // If this was created from a quote, show additional info
         if (fromQuote) {
           alert(`Invoice created from quote ${originalQuoteId}! You can now manage the invoice and track payment.`);
         }
-        
+
         // Reset form
         setParsedInvoice({
           clientId: '',
@@ -391,7 +346,7 @@ export default function NewInvoicePage() {
             Back to Dashboard
           </Link>
           <h1 className="text-3xl font-bold text-gray-900">Create New Invoice</h1>
-          
+
           {fromQuote && (
             <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
               <div className="flex items-center">
@@ -586,5 +541,21 @@ export default function NewInvoicePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function NewInvoicePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 p-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center py-12">
+            <div className="animate-pulse text-foreground">Loading...</div>
+          </div>
+        </div>
+      </div>
+    }>
+      <NewInvoicePageContent />
+    </Suspense>
   );
 }
