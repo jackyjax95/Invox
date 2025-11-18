@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { Mic, MicOff, Save, ArrowLeft, FileText } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/lib/auth-context';
 
 interface Client {
   id: string;
@@ -40,6 +41,7 @@ interface ParsedInvoice {
 }
 
 function NewInvoicePageContent() {
+  const { user } = useAuth();
   const [clients, setClients] = useState<Client[]>([]);
   const [parsedInvoice, setParsedInvoice] = useState<ParsedInvoice>({
     clientId: '',
@@ -285,8 +287,13 @@ function NewInvoicePageContent() {
         return;
       }
 
-      // Get current user (in a real app, this would come from auth)
-      const userId = 'demo-user'; // Replace with actual user ID from auth
+      // Get current user ID from auth
+      if (!user) {
+        alert('You must be logged in to create an invoice');
+        return;
+      }
+
+      const userId = user.id;
 
       // Calculate total cost
       const quantity = parseFloat(parsedInvoice.quantity) || 1;

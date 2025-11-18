@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Plus, TrendingUp, DollarSign, CreditCard, Target, Rocket, Star } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 interface Invoice {
   id: string;
@@ -33,7 +34,7 @@ const motivationalMessages = [
   "🌟 You're a business superstar! Keep shining!",
 ];
 
-export default function Home() {
+function DashboardContent() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
@@ -218,6 +219,7 @@ export default function Home() {
               </div>
             );
           }
+          
           return null;
         })()}
 

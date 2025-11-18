@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { User, Save, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/lib/auth-context';
 
 interface UserProfile {
   id: string;
@@ -16,6 +17,7 @@ interface UserProfile {
 }
 
 export default function ProfilePage() {
+  const { user } = useAuth();
   const [profile, setProfile] = useState<UserProfile>({
     id: '',
     email: '',
@@ -30,21 +32,20 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      try {
-        // For MVP, we'll use a demo user ID
-        const demoUserId = 'demo-user';
+      if (!user) return;
 
+      try {
         // Try to fetch existing profile from Supabase
         const { data: existingProfile, error } = await supabase
           .from('users')
           .select('*')
-          .eq('id', demoUserId)
+          .eq('id', user.id)
           .single();
 
         if (existingProfile && !error) {
           setProfile({
             id: existingProfile.id,
-            email: existingProfile.email || '',
+            email: existingProfile.email || user.email || '',
             name: existingProfile.name || '',
             businessName: existingProfile.business_name || '',
             phone: existingProfile.phone || '',
@@ -54,10 +55,10 @@ export default function ProfilePage() {
         } else {
           // Create a default profile if it doesn't exist
           const defaultProfile = {
-            id: demoUserId,
-            email: 'demo@smartinvoice.com',
-            name: 'Demo User',
-            business_name: 'Smart Invoice Demo',
+            id: user.id,
+            email: user.email || '',
+            name: '',
+            business_name: '',
             phone: '',
             address: '',
             created_at: new Date().toISOString(),
@@ -89,7 +90,7 @@ export default function ProfilePage() {
     };
 
     fetchProfile();
-  }, []);
+  }, [user]);
 
   const handleSave = async () => {
     if (!profile.id) return;
