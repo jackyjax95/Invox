@@ -17,7 +17,15 @@ interface Client {
 
 interface InvoiceData {
   invoice_number?: string;
-  [key: string]: any;
+  id?: string;
+  user_id?: string;
+  client_name?: string;
+  client_email?: string;
+  total?: number;
+  status?: string;
+  created_at?: string;
+  due_date?: string;
+  description?: string;
 }
 
 interface ParsedInvoice {
