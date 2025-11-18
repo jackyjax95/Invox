@@ -96,8 +96,11 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    console.log('Received invoice data:', body);
+
     // Validate required fields
     if (!body.client_name || !body.total || !body.user_id) {
+      console.log('Validation failed:', { client_name: body.client_name, total: body.total, user_id: body.user_id });
       return NextResponse.json({ error: 'Missing required fields: client_name, total, user_id' }, { status: 400 });
     }
 
