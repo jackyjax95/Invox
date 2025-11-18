@@ -12,6 +12,11 @@ interface Client {
   company?: string;
 }
 
+interface QuoteData {
+  id: string;
+  [key: string]: any;
+}
+
 interface ParsedQuote {
   clientId: string;
   clientName: string;
@@ -46,7 +51,6 @@ export default function NewQuotePage() {
 
   const {
     transcript,
-    listening,
     resetTranscript,
     browserSupportsSpeechRecognition
   } = useSpeechRecognition();
@@ -72,7 +76,7 @@ export default function NewQuotePage() {
         if (quotesRes.ok) {
           const quotesData = await quotesRes.json();
           const existingNumbers = quotesData.quotes
-            .map((quote: any) => parseInt(quote.id.replace('Q', '') || '0'))
+            .map((quote: QuoteData) => parseInt(quote.id.replace('Q', '') || '0'))
             .filter((num: number) => !isNaN(num));
 
           const nextNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : 1;
@@ -293,7 +297,7 @@ export default function NewQuotePage() {
                 {isListening ? 'Listening...' : 'Click to start recording'}
               </p>
               <p className="text-sm text-black">
-                Say something like: "Create quote for John Doe, order number PO-12345, for web development services, unit price 1500 dollars, quantity 1, valid for 30 days"
+                Say something like: &ldquo;Create quote for John Doe, order number PO-12345, for web development services, unit price 1500 dollars, quantity 1, valid for 30 days&rdquo;
               </p>
             </div>
           </div>

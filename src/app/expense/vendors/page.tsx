@@ -140,6 +140,8 @@ export default function VendorsPage() {
         phone: '',
         address: '',
         category: '',
+        vatRegistration: '',
+        companyRegistration: '',
         notes: '',
       });
       setShowAddForm(false);

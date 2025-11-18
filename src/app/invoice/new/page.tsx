@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { Mic, MicOff, Save, ArrowLeft, FileText } from 'lucide-react';
 import Link from 'next/link';
-import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 interface Client {
@@ -13,6 +13,11 @@ interface Client {
   name: string;
   email: string;
   company?: string;
+}
+
+interface InvoiceData {
+  invoice_number?: string;
+  [key: string]: any;
 }
 
 interface ParsedInvoice {
@@ -53,7 +58,6 @@ export default function NewInvoicePage() {
 
   const {
     transcript,
-    listening,
     resetTranscript,
     browserSupportsSpeechRecognition
   } = useSpeechRecognition();
@@ -81,7 +85,7 @@ export default function NewInvoicePage() {
         if (invoicesRes.ok) {
           const invoicesData = await invoicesRes.json();
           const existingNumbers = invoicesData.invoices
-            .map((inv: any) => parseInt(inv.invoice_number?.replace('INV', '') || '0'))
+            .map((inv: InvoiceData) => parseInt(inv.invoice_number?.replace('INV', '') || '0'))
             .filter((num: number) => !isNaN(num));
 
           const nextNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : 1;
@@ -143,7 +147,7 @@ export default function NewInvoicePage() {
         cost: calculatedTotal > 0 ? calculatedTotal.toFixed(2) : prev.cost
       }));
     }
-  }, [parsedInvoice.unitPrice, parsedInvoice.quantity]);
+  }, [parsedInvoice.unitPrice, parsedInvoice.quantity, parsedInvoice.cost]);
 
   const startListening = () => {
     setIsListening(true);
@@ -413,7 +417,7 @@ export default function NewInvoicePage() {
                 {isListening ? 'Listening...' : 'Click to start recording'}
               </p>
               <p className="text-sm text-black">
-                Say something like: "Create invoice for John Doe, order number PO-12345, for web development services, unit price 1500 dollars, quantity 1, due date next month"
+                Say something like: &ldquo;Create invoice for John Doe, order number PO-12345, for web development services, unit price 1500 dollars, quantity 1, due date next month&rdquo;
               </p>
             </div>
           </div>

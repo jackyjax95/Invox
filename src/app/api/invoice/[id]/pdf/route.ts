@@ -19,10 +19,11 @@ interface InvoiceData {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const invoiceId = params.id;
+    const resolvedParams = await params;
+    const invoiceId = resolvedParams.id;
 
     // Fetch invoice from Supabase
     const { data: invoice, error } = await supabase
