@@ -51,7 +51,7 @@ export default function InvoicesPage() {
   }, []);
 
   const filteredAndSortedInvoices = useMemo(() => {
-    let filtered = invoices.filter(invoice => {
+    const filtered = invoices.filter(invoice => {
       const matchesSearch = invoice.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            invoice.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            invoice.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -60,8 +60,8 @@ export default function InvoicesPage() {
     });
 
     filtered.sort((a, b) => {
-      let aValue: any = a[sortField];
-      let bValue: any = b[sortField];
+      let aValue: string | number = a[sortField];
+      let bValue: string | number = b[sortField];
 
       if (sortField === 'created_at' || sortField === 'due_date') {
         aValue = new Date(aValue).getTime();

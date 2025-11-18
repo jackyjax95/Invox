@@ -56,7 +56,7 @@ export default function QuotesPage() {
   }, []);
 
   const filteredAndSortedQuotes = useMemo(() => {
-    let filtered = quotes.filter(quote => {
+    const filtered = quotes.filter(quote => {
       const matchesSearch = quote.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            quote.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            quote.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -65,8 +65,8 @@ export default function QuotesPage() {
     });
 
     filtered.sort((a, b) => {
-      let aValue: any = a[sortField];
-      let bValue: any = b[sortField];
+      let aValue: string | number = a[sortField];
+      let bValue: string | number = b[sortField];
 
       if (sortField === 'created_at' || sortField === 'valid_until') {
         aValue = new Date(aValue).getTime();
