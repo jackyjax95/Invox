@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
 import { createClient } from '@supabase/supabase-js';
 
 // Service role client for bypassing RLS in MVP
@@ -11,7 +10,7 @@ const supabaseAdmin = process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.SUPAB
   : null;
 
 // Mock data for development when Supabase is not configured
-let mockInvoices = [
+const mockInvoices = [
   {
     id: 'INV00001',
     invoice_number: 'INV00001',
