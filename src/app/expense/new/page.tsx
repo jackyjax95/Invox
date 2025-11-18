@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Save, ArrowLeft, Receipt, Camera, Search } from 'lucide-react';
 import Link from 'next/link';
 
@@ -60,11 +60,6 @@ export default function NewExpensePage() {
   const [vendorSearchTerm, setVendorSearchTerm] = useState('');
 
   useEffect(() => {
-    // Calculate totals when line items change
-    calculateTotals();
-  }, [formData.lineItems]);
-
-  useEffect(() => {
     // Load vendors from localStorage (in production this would be from API)
     const loadVendors = () => {
       const storedVendors = localStorage.getItem('smart-invoice-vendors');
@@ -86,7 +81,7 @@ export default function NewExpensePage() {
     loadVendors();
   }, []);
 
-  const calculateTotals = () => {
+  const calculateTotals = useCallback(() => {
     let total = 0;
     let vatTotal = 0;
     let exclVatTotal = 0;
@@ -120,7 +115,12 @@ export default function NewExpensePage() {
       vatTotal: vatTotal.toFixed(2),
       exclVatTotal: exclVatTotal.toFixed(2),
     }));
-  };
+  }, [formData.lineItems]);
+
+  useEffect(() => {
+    // Calculate totals when line items change
+    calculateTotals();
+  }, [calculateTotals]);
 
   const validateForm = (): boolean => {
     const newErrors: {[key: string]: string} = {};

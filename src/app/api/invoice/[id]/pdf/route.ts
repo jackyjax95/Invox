@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import jsPDF from 'jspdf';
 
 interface InvoiceItem {
@@ -14,8 +13,8 @@ interface InvoiceData {
   client_email?: string;
   items: InvoiceItem[];
   total: number;
-  created_at: any;
-  due_date: any;
+  created_at: string;
+  due_date: string | null;
 }
 
 export async function GET(
@@ -25,15 +24,16 @@ export async function GET(
   try {
     const invoiceId = params.id;
 
-    // Fetch invoice from Firestore
-    const invoiceRef = doc(db, 'invoices', invoiceId);
-    const invoiceSnap = await getDoc(invoiceRef);
+    // Fetch invoice from Supabase
+    const { data: invoice, error } = await supabase
+      .from('invoices')
+      .select('*')
+      .eq('id', invoiceId)
+      .single();
 
-    if (!invoiceSnap.exists()) {
+    if (error || !invoice) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     }
-
-    const invoice = invoiceSnap.data() as InvoiceData;
 
     // Create PDF
     const pdfDoc = new jsPDF();
@@ -51,8 +51,8 @@ export async function GET(
 
     // Invoice details
     pdfDoc.text(`Invoice ID: ${invoiceId}`, 120, 50);
-    pdfDoc.text(`Date: ${invoice.created_at?.toDate()?.toLocaleDateString('en-GB') || 'N/A'}`, 120, 60);
-    pdfDoc.text(`Due Date: ${invoice.due_date?.toDate()?.toLocaleDateString('en-GB') || 'N/A'}`, 120, 70);
+    pdfDoc.text(`Date: ${invoice.created_at ? new Date(invoice.created_at).toLocaleDateString('en-GB') : 'N/A'}`, 120, 60);
+    pdfDoc.text(`Due Date: ${invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-GB') : 'N/A'}`, 120, 70);
 
     // Client info
     pdfDoc.text('Bill To:', 20, 100);

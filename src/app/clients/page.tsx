@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { Plus, Search, Edit, Trash2, Mail, Phone, Building } from 'lucide-react';
 
 interface Client {
@@ -12,6 +11,14 @@ interface Client {
   company?: string;
   address?: string;
   created_at: string;
+}
+
+interface ClientUpdateData {
+  name: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  address?: string;
 }
 
 export default function ClientsPage() {
@@ -121,7 +128,7 @@ export default function ClientsPage() {
     setEditingClient(clientId);
   };
 
-  const handleUpdateClient = async (clientId: string, updatedClient: any) => {
+  const handleUpdateClient = async (clientId: string, updatedClient: ClientUpdateData) => {
     try {
       const response = await fetch(`/api/clients/${clientId}`, {
         method: 'PUT',
@@ -386,7 +393,7 @@ function ClientEditForm({
   onCancel
 }: {
   client: Client;
-  onSave: (updatedClient: any) => void;
+  onSave: (updatedClient: ClientUpdateData) => void;
   onCancel: () => void;
 }) {
   const [formData, setFormData] = useState({
