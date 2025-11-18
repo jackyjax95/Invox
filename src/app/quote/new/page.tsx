@@ -293,7 +293,7 @@ export default function NewQuotePage() {
                 {isListening ? 'Listening...' : 'Click to start recording'}
               </p>
               <p className="text-sm text-black">
-                Say something like: "Create quote for John Doe, order number PO-12345, for web development services, unit price 1500 dollars, quantity 1, valid for 30 days"
+                Say something like: &quot;Create quote for John Doe, order number PO-12345, for web development services, unit price 1500 dollars, quantity 1, valid for 30 days&quot;
               </p>
             </div>
           </div>
