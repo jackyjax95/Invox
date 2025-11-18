@@ -247,7 +247,7 @@ export default function ClientDetailPage() {
               <div className="text-6xl mb-4">📄</div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">No invoices found</h3>
               <p className="text-gray-500 mb-6">
-                This client doesn't have any invoices yet.
+                This client doesn&apos;t have any invoices yet.
               </p>
               <Link
                 href={`/invoice/new?clientId=${client.id}`}
