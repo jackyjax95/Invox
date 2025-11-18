@@ -76,6 +76,7 @@ export default function ClientsPage() {
         },
         body: JSON.stringify({
           ...newClient,
+          user_id: 'demo-user', // Demo user ID for MVP
           created_at: new Date().toISOString(),
         }),
       });
