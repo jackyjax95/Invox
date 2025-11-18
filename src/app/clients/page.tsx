@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Plus, Search, Edit, Trash2, Mail, Phone, Building } from 'lucide-react';
 
 interface Client {
@@ -11,6 +12,7 @@ interface Client {
   company?: string;
   address?: string;
   created_at: string;
+  outstandingBalance?: number;
 }
 
 interface ClientUpdateData {
@@ -38,12 +40,37 @@ export default function ClientsPage() {
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const response = await fetch('/api/clients');
-        if (!response.ok) {
+        // Fetch clients
+        const clientsResponse = await fetch('/api/clients');
+        if (!clientsResponse.ok) {
           throw new Error('Failed to fetch clients');
         }
-        const data = await response.json();
-        setClients(data.clients || []);
+        const clientsData = await clientsResponse.json();
+        const clientsList = clientsData.clients || [];
+
+        // Fetch all invoices to calculate outstanding balances
+        const invoicesResponse = await fetch('/api/invoices');
+        let invoicesData = { invoices: [] };
+        if (invoicesResponse.ok) {
+          invoicesData = await invoicesResponse.json();
+        }
+
+        // Calculate outstanding balance for each client
+        const clientsWithBalances = clientsList.map((client: Client) => {
+          const clientInvoices = invoicesData.invoices.filter(
+            (invoice: any) => invoice.client_email === client.email
+          );
+          const outstandingBalance = clientInvoices
+            .filter((invoice: any) => invoice.status !== 'paid')
+            .reduce((total: number, invoice: any) => total + parseFloat(invoice.total || 0), 0);
+
+          return {
+            ...client,
+            outstandingBalance
+          };
+        });
+
+        setClients(clientsWithBalances);
       } catch (err) {
         console.error('Error fetching clients:', err);
       } finally {
@@ -313,34 +340,43 @@ export default function ClientsPage() {
                   ) : (
                     // Display Mode
                     <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                            <Building size={20} className="text-primary" />
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-semibold text-gray-900">{client.name}</h3>
-                            {client.company && (
-                              <p className="text-gray-600">{client.company}</p>
-                            )}
-                            <div className="flex items-center gap-4 mt-2">
-                              <div className="flex items-center gap-1 text-sm text-gray-500">
-                                <Mail size={14} />
-                                {client.email}
-                              </div>
-                              {client.phone && (
-                                <div className="flex items-center gap-1 text-sm text-gray-500">
-                                  <Phone size={14} />
-                                  {client.phone}
-                                </div>
-                              )}
+                      <Link
+                        href={`/clients/${client.id}`}
+                        className="flex-1 flex items-center gap-4 hover:bg-gray-50 -m-6 p-6 rounded-lg transition-colors"
+                      >
+                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                          <Building size={20} className="text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">{client.name}</h3>
+                          {client.company && (
+                            <p className="text-gray-600">{client.company}</p>
+                          )}
+                          <div className="flex items-center gap-4 mt-2">
+                            <div className="flex items-center gap-1 text-sm text-gray-500">
+                              <Mail size={14} />
+                              {client.email}
                             </div>
-                            {client.address && (
-                              <p className="text-sm text-gray-500 mt-1">{client.address}</p>
+                            {client.phone && (
+                              <div className="flex items-center gap-1 text-sm text-gray-500">
+                                <Phone size={14} />
+                                {client.phone}
+                              </div>
                             )}
+                          </div>
+                          {client.address && (
+                            <p className="text-sm text-gray-500 mt-1">{client.address}</p>
+                          )}
+                          <div className="mt-3">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium text-gray-700">Outstanding:</span>
+                              <span className={`text-lg font-bold ${client.outstandingBalance && client.outstandingBalance > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                R{(client.outstandingBalance || 0).toFixed(2)}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </Link>
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleEditClient(client.id)}

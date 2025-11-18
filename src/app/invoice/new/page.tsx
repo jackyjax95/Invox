@@ -136,6 +136,16 @@ function NewInvoicePageContent() {
       }
     }
 
+    // Check if clientId is provided (from client detail page)
+    const clientId = searchParams.get('clientId');
+    if (clientId) {
+      // Pre-select the client
+      setParsedInvoice(prev => ({
+        ...prev,
+        clientId: clientId,
+      }));
+    }
+
     fetchClients();
     fetchNextInvoiceNumber();
   }, [searchParams]);
