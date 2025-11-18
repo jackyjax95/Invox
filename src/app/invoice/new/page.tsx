@@ -257,9 +257,23 @@ function NewInvoicePageContent() {
       // Get selected client details
       const selectedClient = clients.find(client => client.id === parsedInvoice.clientId);
 
+      // Ensure we have client name - if not set in parsedInvoice, get it from selected client
+      const clientName = parsedInvoice.clientName || selectedClient?.name || '';
+
+      // Validate that we have all required data
+      if (!clientName) {
+        alert('Please select a valid client');
+        return;
+      }
+
+      if (totalCost <= 0) {
+        alert('Please enter a valid total amount');
+        return;
+      }
+
       // Prepare invoice data
       const invoiceData = {
-        client_name: parsedInvoice.clientName,
+        client_name: clientName,
         client_email: selectedClient?.email || '',
         order_number: parsedInvoice.orderNumber,
         items: [{
@@ -276,6 +290,10 @@ function NewInvoicePageContent() {
       };
 
       console.log('Sending invoice data:', invoiceData);
+      console.log('Selected client:', selectedClient);
+      console.log('Client name from parsedInvoice:', parsedInvoice.clientName);
+      console.log('Final client name used:', clientName);
+      console.log('Total cost:', totalCost);
 
       // Save to mock API instead of Firebase for now
       const response = await fetch('/api/invoices', {
