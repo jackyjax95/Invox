@@ -1,11 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+// Create authenticated Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export async function GET(request: NextRequest) {
   try {
+    // Get the authorization header to authenticate the user
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+
+    // Verify the JWT token and get user
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Fetch expenses for the authenticated user only
     const { data: expenses, error } = await supabase
       .from('expenses')
       .select('*')
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -22,17 +45,32 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Get the authorization header to authenticate the user
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+
+    // Verify the JWT token and get user
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
-    const { vendor, description, amount, category, date, user_id, quantity, vat_included } = body;
+    const { vendor, description, amount, category, date, quantity, vat_included } = body;
 
     // Validate required fields
-    if (!vendor || !amount || !category || !date || !user_id) {
-      return NextResponse.json({ error: 'Missing required fields: vendor, amount, category, date, user_id' }, { status: 400 });
+    if (!vendor || !amount || !category || !date) {
+      return NextResponse.json({ error: 'Missing required fields: vendor, amount, category, date' }, { status: 400 });
     }
 
     // Create new expense
     const newExpense = {
-      user_id,
+      user_id: user.id, // Use authenticated user's ID
       vendor,
       invoice_number: body.invoice_number || '',
       description: description || '',
@@ -44,14 +82,7 @@ export async function POST(request: NextRequest) {
       created_at: new Date().toISOString(),
     };
 
-    console.log('Creating expense:', {
-      vendor: newExpense.vendor,
-      amount: newExpense.amount,
-      category: newExpense.category,
-      user_id: newExpense.user_id,
-    });
-
-    // Insert into Supabase
+    // Insert into Supabase (RLS will ensure user isolation)
     const { data, error } = await supabase
       .from('expenses')
       .insert(newExpense)

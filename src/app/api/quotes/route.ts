@@ -1,13 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 
-// Function to generate next quote number
-async function generateQuoteNumber(): Promise<string> {
+// Create authenticated Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+// Function to generate next quote number for authenticated user
+async function generateQuoteNumber(userId: string): Promise<string> {
   try {
-    // Get the highest quote number
+    // Get the highest quote number for this user
     const { data: quotes, error } = await supabase
       .from('quotes')
       .select('id')
+      .eq('user_id', userId)
       .order('id', { ascending: false })
       .limit(1);
 
@@ -35,9 +42,26 @@ async function generateQuoteNumber(): Promise<string> {
 
 export async function GET(request: NextRequest) {
   try {
+    // Get the authorization header to authenticate the user
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+
+    // Verify the JWT token and get user
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Fetch quotes for the authenticated user only
     const { data: quotes, error } = await supabase
       .from('quotes')
       .select('*')
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -54,38 +78,46 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Get the authorization header to authenticate the user
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+
+    // Verify the JWT token and get user
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
 
     // Validate required fields
-    if (!body.client_name || !body.total || !body.user_id) {
-      return NextResponse.json({ error: 'Missing required fields: client_name, total, user_id' }, { status: 400 });
+    if (!body.client_name || !body.total) {
+      return NextResponse.json({ error: 'Missing required fields: client_name, total' }, { status: 400 });
     }
 
-    // Generate quote ID
-    const quoteId = await generateQuoteNumber();
+    // Generate quote ID for this user
+    const quoteId = await generateQuoteNumber(user.id);
 
     // Create new quote
     const newQuote = {
       id: quoteId,
-      user_id: body.user_id,
+      user_id: user.id, // Use authenticated user's ID
       client_name: body.client_name,
       client_email: body.client_email || '',
       items: body.items || [],
       total: parseFloat(body.total),
       status: body.status || 'draft',
-      created_at: body.created_at || new Date().toISOString(),
+      created_at: new Date().toISOString(),
       valid_until: body.valid_until || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       description: body.description || '',
     };
 
-    console.log('Creating quote:', {
-      id: newQuote.id,
-      client_name: newQuote.client_name,
-      total: newQuote.total,
-      created_at: newQuote.created_at,
-    });
-
-    // Insert into Supabase
+    // Insert into Supabase (RLS will ensure user isolation)
     const { data, error } = await supabase
       .from('quotes')
       .insert(newQuote)

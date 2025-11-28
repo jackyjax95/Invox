@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
 import { createClient } from '@supabase/supabase-js';
 
-// Service role client for bypassing RLS in MVP
-const supabaseAdmin = createClient(
+// Create authenticated Supabase client
+const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
 export async function GET(
@@ -13,13 +12,29 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Get the authorization header to authenticate the user
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+
+    // Verify the JWT token and get user
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { id: clientId } = await params;
 
-    // Fetch client details
-    const { data: client, error: clientError } = await supabaseAdmin
+    // Fetch client details (RLS will ensure user isolation)
+    const { data: client, error: clientError } = await supabase
       .from('clients')
       .select('*')
       .eq('id', clientId)
+      .eq('user_id', user.id) // Ensure client belongs to authenticated user
       .single();
 
     if (clientError || !client) {
@@ -27,11 +42,12 @@ export async function GET(
       return NextResponse.json({ error: 'Client not found' }, { status: 404 });
     }
 
-    // Fetch all invoices for this client
-    const { data: invoices, error: invoicesError } = await supabaseAdmin
+    // Fetch all invoices for this client (RLS will ensure user isolation)
+    const { data: invoices, error: invoicesError } = await supabase
       .from('invoices')
       .select('*')
       .eq('client_email', client.email)
+      .eq('user_id', user.id) // Ensure invoices belong to authenticated user
       .order('created_at', { ascending: false });
 
     if (invoicesError) {
@@ -41,7 +57,7 @@ export async function GET(
 
     // Calculate outstanding balance (sum of unpaid invoices)
     const outstandingBalance = (invoices || [])
-      .filter(invoice => invoice.status !== 'paid')
+      .filter((invoice) => invoice.status !== 'paid')
       .reduce((total, invoice) => total + parseFloat(invoice.total || 0), 0);
 
     return NextResponse.json({
@@ -60,13 +76,29 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Get the authorization header to authenticate the user
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+
+    // Verify the JWT token and get user
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { id: clientId } = await params;
 
-    // Delete client from Supabase
+    // Delete client from Supabase (RLS will ensure user isolation)
     const { error } = await supabase
       .from('clients')
       .delete()
-      .eq('id', clientId);
+      .eq('id', clientId)
+      .eq('user_id', user.id); // Ensure client belongs to authenticated user
 
     if (error) {
       console.error('Error deleting client:', error);

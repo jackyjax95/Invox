@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Plus, TrendingUp, DollarSign, CreditCard, Target, Rocket, Star } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { authenticatedFetch } from "@/lib/auth-context";
 
 interface Invoice {
   id: string;
@@ -46,8 +47,8 @@ function DashboardContent() {
     const fetchData = async () => {
       try {
         const [invoicesRes, expensesRes] = await Promise.all([
-          fetch('/api/invoices'),
-          fetch('/api/expenses')
+          authenticatedFetch('/api/invoices'),
+          authenticatedFetch('/api/expenses')
         ]);
 
         if (invoicesRes.ok) {

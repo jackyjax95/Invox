@@ -4,6 +4,24 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 
+// Utility function for authenticated API calls
+export async function authenticatedFetch(url: string, options: RequestInit = {}) {
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (!session?.access_token) {
+    throw new Error('No authentication token available');
+  }
+
+  const headers = new Headers(options.headers);
+  headers.set('Authorization', `Bearer ${session.access_token}`);
+  headers.set('Content-Type', 'application/json');
+
+  return fetch(url, {
+    ...options,
+    headers,
+  });
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;

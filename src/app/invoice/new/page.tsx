@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { Mic, MicOff, Save, ArrowLeft, FileText } from 'lucide-react';
 import Link from 'next/link';
-import { useAuth } from '@/lib/auth-context';
+import { useAuth, authenticatedFetch } from '@/lib/auth-context';
 
 interface Client {
   id: string;
@@ -73,7 +73,7 @@ function NewInvoicePageContent() {
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const clientsRes = await fetch('/api/clients');
+        const clientsRes = await authenticatedFetch('/api/clients');
         if (clientsRes.ok) {
           const clientsData = await clientsRes.json();
           console.log('Fetched clients:', clientsData.clients); // Debug log
@@ -89,7 +89,7 @@ function NewInvoicePageContent() {
     const fetchNextInvoiceNumber = async () => {
       try {
         // Get current invoices to calculate next number
-        const invoicesRes = await fetch('/api/invoices');
+        const invoicesRes = await authenticatedFetch('/api/invoices');
         if (invoicesRes.ok) {
           const invoicesData = await invoicesRes.json();
           const existingNumbers = invoicesData.invoices
@@ -170,7 +170,7 @@ function NewInvoicePageContent() {
   const checkMilestoneAchievement = async () => {
     try {
       // Get current invoice count
-      const invoicesRes = await fetch('/api/invoices');
+      const invoicesRes = await authenticatedFetch('/api/invoices');
       if (invoicesRes.ok) {
         const invoicesData = await invoicesRes.json();
         const invoiceCount = invoicesData.invoices?.length || 0;
@@ -182,11 +182,8 @@ function NewInvoicePageContent() {
         if (achievedMilestone) {
           // Generate social post for this milestone
           const businessName = 'Invox'; // Could be fetched from user profile
-          const postRes = await fetch('/api/social-post', {
+          const postRes = await authenticatedFetch('/api/social-post', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
             body: JSON.stringify({
               milestone: achievedMilestone,
               businessName: businessName
@@ -341,12 +338,9 @@ function NewInvoicePageContent() {
       console.log('Final client name used:', clientName);
       console.log('Total cost:', totalCost);
 
-      // Save to mock API instead of Firebase for now
-      const response = await fetch('/api/invoices', {
+      // Save invoice using authenticated API call
+      const response = await authenticatedFetch('/api/invoices', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(invoiceData),
       });
 
