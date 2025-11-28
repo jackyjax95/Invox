@@ -67,6 +67,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Name and email are required' }, { status: 400 });
     }
 
+    // Ensure user record exists in public.users table
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('id', user.id)
+      .single();
+
+    if (!existingUser) {
+      // Create user record if it doesn't exist
+      const { error: userError } = await supabase
+        .from('users')
+        .insert({
+          id: user.id,
+          email: user.email,
+          name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+          created_at: new Date().toISOString(),
+        });
+
+      if (userError) {
+        console.error('Error creating user record:', userError);
+        return NextResponse.json({ error: 'Failed to create user record' }, { status: 500 });
+      }
+    }
+
     // Create new client
     const newClient = {
       user_id: user.id, // Use authenticated user's ID

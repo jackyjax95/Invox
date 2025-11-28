@@ -111,6 +111,21 @@ CREATE POLICY "Users can update own clients" ON public.clients
 CREATE POLICY "Users can delete own clients" ON public.clients
     FOR DELETE USING (auth.uid() = user_id);
 
+-- Create trigger to automatically create user record when auth user is created
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.users (id, email, name, created_at)
+  VALUES (NEW.id, NEW.email, NEW.raw_user_meta_data->>'name', NEW.created_at);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Create trigger on auth.users
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
 -- Invoices policies
 CREATE POLICY "Users can view own invoices" ON public.invoices
     FOR SELECT USING (auth.uid() = user_id);
