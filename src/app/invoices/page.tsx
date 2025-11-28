@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Eye, Download, Mail, Search, Filter, ChevronUp, ChevronDown, ArrowUpDown, Plus } from 'lucide-react';
+import { authenticatedFetch } from '@/lib/auth-context';
 
 interface Invoice {
   id: string;
@@ -33,7 +34,7 @@ export default function InvoicesPage() {
   useEffect(() => {
     const fetchInvoices = async () => {
       try {
-        const response = await fetch('/api/invoices');
+        const response = await authenticatedFetch('/api/invoices');
         if (!response.ok) {
           throw new Error('Failed to fetch invoices');
         }

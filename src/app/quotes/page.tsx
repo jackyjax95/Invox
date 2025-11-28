@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Eye, Download, Search, Filter, ChevronUp, ChevronDown, ArrowUpDown, Plus, FileText } from 'lucide-react';
+import { authenticatedFetch } from '@/lib/auth-context';
 
 interface Quote {
   id: string;
@@ -38,7 +39,7 @@ export default function QuotesPage() {
   useEffect(() => {
     const fetchQuotes = async () => {
       try {
-        const response = await fetch('/api/quotes');
+        const response = await authenticatedFetch('/api/quotes');
         if (!response.ok) {
           throw new Error('Failed to fetch quotes');
         }

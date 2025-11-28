@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Plus, Search, Edit, Trash2, Mail, Phone, Building } from 'lucide-react';
+import { authenticatedFetch } from '@/lib/auth-context';
 
 interface Client {
   id: string;
@@ -51,7 +52,7 @@ export default function ClientsPage() {
     const fetchClients = async () => {
       try {
         // Fetch clients
-        const clientsResponse = await fetch('/api/clients');
+        const clientsResponse = await authenticatedFetch('/api/clients');
         if (!clientsResponse.ok) {
           throw new Error('Failed to fetch clients');
         }
@@ -59,7 +60,7 @@ export default function ClientsPage() {
         const clientsList = clientsData.clients || [];
 
         // Fetch all invoices to calculate outstanding balances
-        const invoicesResponse = await fetch('/api/invoices');
+        const invoicesResponse = await authenticatedFetch('/api/invoices');
         let invoicesData: { invoices: Invoice[] } = { invoices: [] };
         if (invoicesResponse.ok) {
           invoicesData = await invoicesResponse.json();
@@ -106,14 +107,13 @@ export default function ClientsPage() {
     }
 
     try {
-      const response = await fetch('/api/clients', {
+      const response = await authenticatedFetch('/api/clients', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           ...newClient,
-          user_id: '550e8400-e29b-41d4-a716-446655440000', // Demo user UUID from seed data
           created_at: new Date().toISOString(),
         }),
       });
@@ -146,7 +146,7 @@ export default function ClientsPage() {
     }
 
     try {
-      const response = await fetch(`/api/clients/${clientId}`, {
+      const response = await authenticatedFetch(`/api/clients/${clientId}`, {
         method: 'DELETE',
       });
 
@@ -168,7 +168,7 @@ export default function ClientsPage() {
 
   const handleUpdateClient = async (clientId: string, updatedClient: ClientUpdateData) => {
     try {
-      const response = await fetch(`/api/clients/${clientId}`, {
+      const response = await authenticatedFetch(`/api/clients/${clientId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
